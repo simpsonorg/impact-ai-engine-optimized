@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Impact Analyzer – Multi-Repo</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+    <style>
+        body { background: #F6F9FC; font-family: Inter, Arial, sans-serif; color:#14202b; margin:0; padding:18px; }
+        .container { max-width:1100px; margin: 0 auto; }
+        .card { background:#fff; border-radius:12px; padding:18px; box-shadow:0 6px 18px rgba(2,24,80,0.06); margin-bottom:16px; }
+        h1 { margin:0 0 8px 0; color:#004B8D; }
+        p { margin:0 0 12px 0; color:#44505b; }
+        textarea { width:100%; height:140px; padding:12px; border-radius:8px; border:1px solid #e6eef7; font-size:14px; resize:vertical; }
+        button { background:#004B8D; color:#fff; padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+        .split { display:grid; grid-template-columns:1fr 420px; gap:12px; align-items:start; }
+        .output-box { background:#fbfdff; border:1px solid #eef6fb; padding:12px; border-radius:8px; height:420px; overflow:auto; }
+        .file-item { font-size:13px; margin-bottom:8px; }
+        .loader { display:inline-block; width:20px; height:20px; border-radius:50%; border:3px solid #e3ecf5; border-top:3px solid #004B8D; animation:spin .9s linear infinite; margin-left:8px; vertical-align:middle; }
+        @keyframes spin { from { transform:rotate(0deg);} to { transform:rotate(360deg);} }
+        .warn { background:#FFF4E5; border-left:4px solid #FF8C00; padding:10px; border-radius:8px; margin-bottom:12px; }
+        .log-box { background:#0b0f14; color:#e6edf3; padding:10px; border-radius:8px; height:180px; overflow:auto; font-family:Consolas, monospace; font-size:12px; }
+        .log-entry { margin-bottom:6px; }
+        .success { color:#2ECC71; }
+        .error { color:#FF7A7A; }
+        .info { color:#00A6D6; }
+        small { color:#6b7785; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="banner" class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>Impact Analyzer</h1>
+                <p>Scan repositories under <strong>simpsonorg</strong>, find impacted files for your requirement and produce a PR comment.</p>
+                <small>Tip: set <code>OPENAI_API_KEY</code> in your environment to enable embeddings and LLM PR generation.</small>
+            </div>
+            <div style="text-align:right;">
+                <div id="keyStatus" style="font-weight:700; color:#44505b;">Checking key…</div>
+            </div>
+        </div>
+
+        <div id="warnContainer"></div>
+
+        <div class="card">
+            <label for="req"><strong>Requirement</strong></label>
+            <textarea id="req" placeholder="Example: Add a new email field in account load service"></textarea>
+            <div style="margin-top:10px;">
+                <button id="runBtn">Analyze</button>
+                <span id="spin" style="display:none" class="loader"></span>
+            </div>
+        </div>
+
+        <div class="split">
+            <div class="card">
+                <h2 style="margin-top:0;color:#004B8D;">Candidate Files</h2>
+                <div id="files" class="output-box"><em>No results yet — run an analysis.</em></div>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-top:0;color:#004B8D;">Diagnostics & Logs</h2>
+                <div id="logs" class="log-box"><div class="log-entry info">UI ready.</div></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+            <h2 style="margin-top:0;color:#004B8D;">Generated PR Comment</h2>
+            <div id="pr" class="output-box"><em>No output yet.</em></div>
+        </div>
+    </div>
+
+<script>
+function addLog(msg, level='info') {
+    const logs = document.getElementById('logs');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry ' + level;
+    entry.innerText = msg;
+    logs.appendChild(entry);
+    logs.scrollTop = logs.scrollHeight;
+}
+
+async function checkKey() {
+    try {
+        const resp = await fetch('/keycheck');
+        // if server returned HTML unexpectedly, this will throw and be caught below
+        const j = await resp.json();
+        if (j.key_present) {
+            document.getElementById('keyStatus').innerText = 'OpenAI key: present (full mode)';
+            addLog('OPENAI_API_KEY detected — full mode', 'success');
+        } else {
+            document.getElementById('keyStatus').innerText = 'OpenAI key: missing (fallback)';
+            addLog('OPENAI_API_KEY missing — fallback mode (no embeddings/LLM)', 'error');
+            const warn = document.createElement('div');
+            warn.className = 'warn';
+            warn.innerHTML = '⚠️ OpenAI API key not found. The app will run in fallback (keyword-match) mode. Set OPENAI_API_KEY environment variable to enable embeddings and PR generation.';
+            document.getElementById('warnContainer').appendChild(warn);
+        }
+    } catch (e) {
+        // likely HTML returned -> show error and log
+        addLog('Failed keycheck: ' + e, 'error');
+        document.getElementById('keyStatus').innerText = 'Key check failed';
+    }
+}
+
+checkKey();
+
+document.getElementById('runBtn').addEventListener('click', async function() {
+    const txt = document.getElementById('req').value.trim();
+    if (!txt) { alert('Please enter a requirement'); return; }
+    document.getElementById('files').innerHTML = '<em>Scanning repositories…</em>';
+    document.getElementById('pr').innerHTML = '<em>Processing…</em>';
+    document.getElementById('spin').style.display = 'inline-block';
+    addLog('Starting analysis', 'info');
+
+    try {
+        const resp = await fetch('/analyze', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ requirement: txt })
+        });
+        const j = await resp.json();
+
+        if (j.error) {
+            addLog('Backend error: ' + j.error, 'error');
+            document.getElementById('files').innerHTML = '<pre>' + j.error + '</pre>';
+            document.getElementById('pr').innerHTML = '<pre>' + j.error + '</pre>';
+            return;
+        }
+
+        if (!j.matches || j.matches.length === 0) {
+            document.getElementById('files').innerHTML = '<em>No candidate files found.</em>';
+        } else {
+            document.getElementById('files').innerHTML = j.matches.map(m => `<div class="file-item"><b>${m.repo}</b> / ${m.file} — score ${m.score}</div>`).join('');
+        }
+
+        document.getElementById('pr').innerHTML = j.pr_html || '<em>No PR content returned.</em>';
+
+        if (j.logs && j.logs.length) {
+            const logsEl = document.getElementById('logs');
+            j.logs.forEach(l => {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry info';
+                entry.innerText = l;
+                logsEl.appendChild(entry);
+            });
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        addLog('Analysis completed', 'success');
+
+    } catch (e) {
+        addLog('Exception: ' + e, 'error');
+        document.getElementById('files').innerHTML = '<pre>' + e + '</pre>';
+        document.getElementById('pr').innerHTML = '<pre>' + e + '</pre>';
+    } finally {
+        document.getElementById('spin').style.display = 'none';
+    }
+});
+</script>
+
+</body>
+</html>
