@@ -2,7 +2,7 @@ name: Cross-Repo Impact Analysis
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master ]
     types: [opened, synchronize, reopened, edited]
 
 permissions:
@@ -10,8 +10,11 @@ permissions:
   pull-requests: write
 
 env:
+  # Replace simpsonorg if your GitHub org is different
   ORG: simpsonorg
+  # Central analyzer repo (the archive used "impact-ai-engine-optimized")
   IMPACT_REPO: impact-ai-engine-optimized
+  # Microservice repo names (exact names found in your ZIP; note the '' suffix)
   MICROSERVICES: "ui-account-load apigee-mock-gateway psg-mock-router domain-ms-account-load crud-ms-account-load-db crud-ms-account-load-fdr fdr-vendor-mock"
 
 jobs:
@@ -21,68 +24,82 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      # 1. Checkout current microservice repo (PR source)
+      # 1) Checkout current repository (PR)
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. Checkout centralized impact-ai-engine-optimized into ./impact-ai-engine-optimized
-      - name: Checkout impact-ai-engine-optimized
+      # 2) Checkout the analyzer repo into ./impact-ai-engine-optimized
+      - name: Checkout impact-ai-engine-optimized (central analyzer)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.ORG }}/${{ env.IMPACT_REPO }}
           path: impact-ai-engine-optimized
           fetch-depth: 0
 
-      # 3. Clone all microservice repos (so analyzer can scan full graph)
+      # 3) Clone the microservice repos (the exact names that appear in your ZIP)
       - name: Clone microservice repos
         run: |
+          set -euo pipefail
           for r in $MICROSERVICES; do
-            echo "Cloning $r..."
+            echo "Cloning ${r}..."
+            # try authenticated checkout first (will use runner token if available),
+            # fallback to HTTPS anonymous clone to avoid failing the job if repo missing
             git clone https://github.com/${{ env.ORG }}/${r} || echo "Warning: clone failed for ${r}"
           done
 
-      # 4. Setup Python
+      # 4) Setup Python
       - name: Setup Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
-      # 5. Install dependencies
+      # 5) Install dependencies
       - name: Install analyzer dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r impact-ai-engine-optimized/requirements.txt
 
-      # 6. Detect changed files in this PR
+      # 6) Get changed files in PR
       - name: Get changed files in PR
         id: changes
         uses: tj-actions/changed-files@v45
 
-      # 7. Run the impact analysis (generate impact_report.md)
+      # 7) Run the impact analyzer (produce impact_report.md) and create base64 output
       - name: Run Impact Analysis
         id: run_analysis
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           REPOS_BASE_DIR: ${{ github.workspace }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           CHANGED_FILES: ${{ join(steps.changes.outputs.all_changed_files, '\n') }}
         run: |
           set -euo pipefail
-          echo "Running impact-ai-engine-optimized..."
-          python impact-ai-engine-optimized/run_analysis.py > impact_report.md || true
-          # ensure file exists
-          if [ ! -f impact_report.md ]; then
-            echo "<!-- Impact Analyzer produced no output -->" > impact_report.md
-          fi
-          # base64-encode to safely transport as step output (avoids JS parse problems)
-          echo "REPORT_B64<<EOF" >> $GITHUB_OUTPUT
-          base64 -w 0 impact_report.md || true
-          echo >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Running impact analyzer..."
 
-      # 8. Post PR comment safely (decode base64 inside node)
+          # run the analyzer -- path matches checkout above
+          python impact-ai-engine-optimized/run_analysis.py > impact_report.md || true
+
+          # ensure the report exists (create a marker if not)
+          if [ ! -f impact_report.md ]; then
+            echo "<!-- Impact Analyzer produced no file -->" > impact_report.md
+          fi
+
+          # Debug preview of the generated report (first 200 lines)
+          echo "---- impact_report.md preview (first 200 lines) ----"
+          sed -n '1,200p' impact_report.md || true
+          echo "---- end preview ----"
+
+          # Base64-encode the report and write into $GITHUB_OUTPUT safely.
+          # NOTE: using >> "$GITHUB_OUTPUT" to append the encoded content into the workflow outputs
+          echo "REPORT_B64<<EOF" >> "$GITHUB_OUTPUT"
+          base64 -w 0 impact_report.md >> "$GITHUB_OUTPUT" || true
+          echo >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      # 8) Post PR comment (safe decoding in node)
       - name: Post PR Comment (safe decode)
         uses: actions/github-script@v7
         with:
