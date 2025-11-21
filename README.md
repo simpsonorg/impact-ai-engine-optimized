@@ -197,17 +197,17 @@ Security & privacy
 
 ---
 
-## Submission checklist (for evaluators)
+## Workflow
 
-| Step | File / Concept | Status |
-|---|---|:---:|
-| Entry Point | `run_analysis.py` (`run_analysis.run_analysis`) | Complete |
-| Discovery | `analyzer/vcs_scanner.py` (contract parsing) | Complete |
-| Graphing | `analyzer/graph_builder.py` (NetworkX & Metrics) | Complete |
-| RAG/Embeddings | `analyzer/rag_retriever.py` (FAISS, NumPy, OpenAI Embeddings) | Complete |
-| LLM Output | `analyzer/impact_analyzer.py` (Structured JSON & Markdown) | Complete |
-| Testing | `tests/` (Unit tests via `pytest -q`) | Complete |
-| CI Example | `.github/workflows/impact-analysis.yml` | Complete |
+| Step | File / Concept |
+|---|---|
+| Entry Point | `run_analysis.py` (`run_analysis.run_analysis`) 
+| Discovery | `analyzer/vcs_scanner.py` (contract parsing) 
+| Graphing | `analyzer/graph_builder.py` (NetworkX & Metrics) 
+| RAG/Embeddings | `analyzer/rag_retriever.py` (FAISS, NumPy, OpenAI Embeddings) 
+| LLM Output | `analyzer/impact_analyzer.py` (Structured JSON & Markdown) 
+| Testing | `tests/` (Unit tests via `pytest -q`)
+| CI Example | `.github/workflows/impact-analysis.yml` 
 
 ---
 
@@ -230,4 +230,5 @@ For further improvements consider:
 
 
 **_Last updated: 2025-11-21_**
+
 
