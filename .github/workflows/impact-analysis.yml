@@ -68,7 +68,7 @@ jobs:
 
       # 7) Run the impact analyzer (produce impact_report.md) and create base64 output
       - name: Run Impact Analysis
-        id: run_analysis
+        id: impact
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
