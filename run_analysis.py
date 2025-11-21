@@ -15,7 +15,6 @@ def load_changed_files() -> list:
 
 
 def discover_microservices(base_dir="."):
-    # Minimal heuristic: expected service folders; fallback to sample list.
     svc = []
     for name in [
         "ui-account-load",
@@ -42,7 +41,6 @@ def build_knowledge_graph(svc_graph):
 
 
 def impacted_services_from_files(changed_files, services, KG):
-    # For prototype, mark all services impacted if ambiguous
     return services, []
 
 
@@ -72,7 +70,9 @@ def run_analysis():
     pr_title = os.getenv("PR_TITLE", "(no PR title)")
     base_dir = os.getenv("REPOS_BASE_DIR", ".")
     changed_files = load_changed_files()
+
     header = f"<!-- Impact Analysis Generated: {datetime.utcnow().isoformat()}Z -->\n"
+
     if not changed_files:
         return header + "# Impact Analysis Report\nNo changed files detected."
 
@@ -90,14 +90,9 @@ def run_analysis():
     try:
         ai_comment = analyze(pr_title, changed_files, impacted, graph_json, snippets)
     except Exception as e:
-        ai_comment = (
-            "# Impact Analysis Error\nLLM analysis failed: "
-            + str(e)
-            + "\n\n"
-            + traceback.format_exc()
-        )
+        ai_comment = "# Impact Analysis Error\nLLM analysis failed: " + str(e) \
+            + "\n\n" + traceback.format_exc()
 
-    # Write simple artifact
     try:
         with open("impact-summary.json", "w") as f:
             json.dump(
