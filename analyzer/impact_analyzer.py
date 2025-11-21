@@ -45,106 +45,62 @@ def compact_snippets_text(snippets, limit=6):
     return "\n\n".join(parts)
 
 
-# -------------------------------------------------------------------------
-# ONLY THIS FUNCTION IS CHANGED → UI UPGRADE ONLY
-# -------------------------------------------------------------------------
 def build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Premium Elegant UI Prompt — NO functional changes.
+    Build a strict prompt that asks the LLM to return ONLY Markdown:
+    - Top summary table
+    - Per-service tables with specific columns
+    - Recommended test list
+    - Final guidance paragraph
     """
     snippet_block = compact_snippets_text(snippets, limit=6) if snippets else "No code snippets available."
+    prompt = f"""
+You are an expert software architect. Produce a GitHub PR impact comment in PURE MARKDOWN ONLY (no HTML).
+Return the following sections **exactly** (use Markdown tables where indicated):
 
-    return f"""
-You are a senior software architect. Produce a **visually stunning, premium GitHub PR Impact Dashboard** using **PURE MARKDOWN ONLY** (no HTML).
-
-Your Markdown must be clean, elegant, readable, and structured like a polished product UI.
-Use emojis, spacing, hierarchy, clarity, and professional tone.
-DO NOT output JSON, HTML, code blocks, or the context section.
-
-==============================================================================
-# 🚀 **PR Impact Dashboard**
-A premium visual overview for reviewers.
-
-==============================================================================
-## 🔥 **Top-Level Summary**
-Render a clean table:
-
+1) Top-level summary table with columns:
 | Severity | Impacted Services | Changed Files Count | Recommendation |
-|:-------:|-------------------|:-------------------:|----------------|
+|---:|---|---:|---|
 
-- Severity should use emoji badges:  
-  🟢 LOW 🟡 MEDIUM 🔴 HIGH  
+2) A short "Summary" paragraph (2-4 sentences).
 
-==============================================================================
-## 📝 **Executive Summary**
-Write 3–5 refined sentences describing:
-- What this PR changes  
-- How the modified files affect system behavior  
-- Upstream/downstream impact  
-- Any key risks  
+3) For each impacted service produce a table with columns:
+| Service | Impact Level | Reason | Files Changed | Suggested Tests | Recommended Actions | Potential Risks | Suggested Reviewers |
+|---|---|---|---|---|---|---|---|
 
-==============================================================================
-## 🧩 **Per-Service Impact Analysis**
-For **each impacted service**, generate this block:
+- Fill the table rows. Keep text concise (1-3 short sentences per cell).
+- Files Changed should be comma-separated relative paths.
+- Suggested Tests should be a comma-separated list (or 'N/A').
+- Suggested Reviewers should be GitHub handles if known or team names.
 
-### 🧱 **<service-name>**
-> One elegant sentence explaining why this service is impacted.
+4) "Recommended Tests" section as a Markdown bulleted list (4-7 items).
 
-**📄 Files to Review:**  
-- List of changed files relevant to this service
+5) "Final Reviewer Guidance" short paragraph (2-4 lines).
 
-**🛠 Recommended Actions:**  
-- 2–4 bullet points  
-- Keep concise and technical
-
-**⚠️ Risk Level:** LOW / MEDIUM / HIGH  
-**👥 Suggested Reviewers:** GitHub handles or "TBD"
-
-==============================================================================
-## 🧪 **Recommended Test Coverage**
-Provide 4–7 meaningful test recommendations:
-- End-to-end tests  
-- Contract validation  
-- Schema checks  
-- Negative/error paths  
-- Performance considerations  
-
-==============================================================================
-## 🧠 **Final Reviewer Guidance**
-Provide 3–5 polished sentences summarizing:
-- Critical items to verify  
-- Integration concerns  
-- Merge safety  
-- Rollback readiness  
-
-==============================================================================
-### 🔍 CONTEXT (DO NOT OUTPUT THIS)
+CONTEXT (do not print this block; use it to reason):
 
 PR Title:
 {pr_title}
 
-Changed Files:
+Changed files:
 {json.dumps(changed_files, indent=2)}
 
-Impacted Services:
+Impacted services:
 {json.dumps(impacted_services, indent=2)}
 
-Service Dependency Graph:
+Service dependency graph (JSON):
 {json.dumps(graph_json, indent=2)}
 
-Code Snippets:
+Relevant code snippets (for reasoning):
 {snippet_block}
 
 RULES:
-- MUST output only Markdown.
-- DO NOT output this context.
-- No HTML, no code blocks.
+- OUTPUT MUST BE PURE MARKDOWN. Do NOT include any explanations outside the requested sections.
+- Avoid hallucination: if you don't know reviewers or tests, write 'TBD' or 'N/A'.
+- Keep each table cell reasonably short. Use line breaks (<br>) if multiple short items are needed.
 """
+    return prompt
 
-
-# -------------------------------------------------------------------------
-# NO CHANGES BELOW THIS LINE
-# -------------------------------------------------------------------------
 
 def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
@@ -169,20 +125,18 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
                 temperature=0.12,
             )
             content = resp.choices[0].message.content
+            # enforce that it returns markdown only; if not, fallback to deterministic
             if not content.strip():
                 raise ValueError("LLM returned empty content")
             return content
         except Exception as e:
+            # fall back to deterministic markdown below but include an error header
             fallback_header = f"> **⚠️ LLM failed:** {str(e)}\n\n"
-            deterministic = _build_deterministic_markdown(
-                pr_title, changed_files, impacted_services, graph_json, snippets, severity
-            )
+            deterministic = _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
             return fallback_header + deterministic
 
     # No OpenAI configured: deterministic markdown
-    return _build_deterministic_markdown(
-        pr_title, changed_files, impacted_services, graph_json, snippets, severity
-    )
+    return _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
 
 
 def _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity):
@@ -191,45 +145,49 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
     top_table = (
         "| Severity | Impacted Services | Changed Files Count | Recommendation |\n"
         "|---:|---|---:|---|\n"
-        f"| **{md_escape(severity)}** | {md_escape(impacted_display)} | {len(changed_files)} | "
-        f"{md_escape('Run integration tests across impacted services; coordinate schema changes.')} |\n"
+        f"| **{md_escape(severity)}** | {md_escape(impacted_display)} | {len(changed_files)} | {md_escape('Run integration tests across impacted services; coordinate schema changes.') } |\n"
     )
 
     # Summary paragraph
-    summary_lines = [
-        f"**PR Title:** {md_escape(pr_title)}",
-        f"Changed {len(changed_files)} file(s): {md_escape(', '.join(changed_files))}."
-        if changed_files else "No changed files found in CHANGED_FILES env variable.",
-        f"Estimated severity based on impacted services: **{md_escape(severity)}**."
-    ]
+    summary_lines = []
+    summary_lines.append(f"**PR Title:** {md_escape(pr_title)}")
+    if changed_files:
+        summary_lines.append(f"Changed {len(changed_files)} file(s): {md_escape(', '.join(changed_files))}.")
+    else:
+        summary_lines.append("No changed files found in CHANGED_FILES env variable.")
+    summary_lines.append(f"Estimated severity based on impacted services: **{md_escape(severity)}**.")
     summary = "\n\n".join(summary_lines)
 
     # Per-service tables
     per_service_sections = []
     for svc in impacted_services:
+        # attempt to extract files for service from graph_json (if available)
         files_changed = []
+        # graph_json might not contain files list; so check changed_files for path prefixes
         for cf in changed_files:
             if cf.replace("\\", "/").startswith(svc + "/") or f"/{svc}/" in cf.replace("\\", "/"):
                 files_changed.append(cf)
         files_cell = md_escape(", ".join(files_changed)) if files_changed else "N/A"
 
-        if "db" in svc.lower() or "crud" in svc.lower():
+        # simple heuristics for impact and reasons
+        if svc.lower().find("db") >= 0 or svc.lower().find("crud") >= 0:
             impact_level = "Medium"
-            reason = "Data read/write boundary; schema changes may break consumers."
+            reason = "Data read/write boundary; schema or field changes may break consumers."
             suggested_tests = "DB contract tests, integration account-load flow"
-        elif "ui" in svc.lower() or "frontend" in svc.lower():
+        elif svc.lower().find("ui") >= 0 or svc.lower().find("frontend") >= 0:
             impact_level = "Low"
-            reason = "UI may need adaptation for new fields or formats."
+            reason = "UI may require adaptation for new fields or error formats."
             suggested_tests = "UI smoke tests, rendering checks"
         else:
             impact_level = "High"
-            reason = "Core domain changes may cascade to downstream services."
+            reason = "Core domain changes may cascade to downstream services and vendors."
             suggested_tests = "End-to-end account-load flow, contract tests"
 
         recommended_actions = "Review API contracts; add integration tests; notify downstream owners"
-        potential_risks = "Incorrect data, latency issues, service errors"
+        potential_risks = "Incorrect data, increased latency, service errors"
         suggested_reviewers = "TBD"
 
+        # assemble a single-row table for the service (we keep one row per service)
         svc_row = (
             "| " + md_escape(svc) + " | "
             + md_escape(impact_level) + " | "
@@ -240,32 +198,32 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
             + md_escape(potential_risks) + " | "
             + md_escape(suggested_reviewers) + " |\n"
         )
-
         header = (
             "| Service | Impact Level | Reason | Files Changed | Suggested Tests | Recommended Actions | Potential Risks | Suggested Reviewers |\n"
             "|---|---|---|---|---|---|---|---|\n"
         )
-
         per_service_sections.append(f"### {md_escape(svc)}\n\n{header}{svc_row}")
 
     per_service_md = "\n\n".join(per_service_sections) if per_service_sections else "_No impacted services detected._"
 
-    # Recommended tests list
-    tests_md = "\n".join([
-        "- End-to-end account-load integration test",
-        "- Backward compatibility contract tests",
-        "- Schema validation for new/changed payload fields",
-        "- Performance smoke test",
-        "- Audit logs/observability checks"
-    ])
+    # Recommended tests list (generic)
+    recommended_tests = [
+        "End-to-end account-load integration test",
+        "Backward compatibility contract tests",
+        "Schema validation for new/changed payload fields",
+        "Performance smoke test for the modified flow",
+        "Audit logs/observability checks post-deploy"
+    ]
+    tests_md = "\n".join([f"- {md_escape(t)}" for t in recommended_tests])
 
     # Final guidance
     final_guidance = (
-        "Before merging, ensure integration tests pass between affected services, "
-        "notify downstream owners, and prepare a rollback plan."
+        "Before merging, ensure integration tests pass between the affected services, "
+        "notify the downstream owners listed above, and schedule a quick runbook review in case of rollback."
     )
 
-    return "\n".join([
+    # Assemble full document
+    parts = [
         "# PR Impact Summary",
         "",
         top_table,
@@ -286,4 +244,5 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
         "",
         final_guidance,
         ""
-    ])
+    ]
+    return "\n".join(parts)
