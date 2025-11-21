@@ -1,11 +1,11 @@
 <!-- filepath: c:\data\maincode\impact-ai-engine-optimized-main\README.md -->
-# 🚀 Optimized Impact Analyzer Engine
+# 🚀 AI Optimized Impact Analyzer Engine - Impact Delphyne
 
 🎯 Stop the Fire Drill: Precise Impact Analysis for Services, APIs & Infrastructure
 
 🌟 Project Overview
 
-The Optimized Impact Analyzer Engine is a specialized, reproducible analysis tool designed to **eliminate guesswork** in complex service and infrastructure environments. **When a developer submits a code change, this engine executes in CI to build a dynamic knowledge graph of the entire landscape (microservices, API gateways, client SDKs, Nginx/Apigee configs, CRUD services, and databases), accurately tracing the downstream ripple effect of the change**.
+The AI Optimized Impact Analyzer Engine is a specialized, reproducible analysis tool designed to **eliminate guesswork** in complex service and infrastructure environments. **When a developer submits a code change, this engine executes in CI to build a dynamic knowledge graph of the entire landscape (microservices, API gateways, client SDKs, Nginx/Apigee configs, CRUD services, and databases), accurately tracing the downstream ripple effect of the change**.
 
 Our core innovation lies in the seamless integration of **knowledge graph pathfinding (NetworkX) with Retrieval-Augmented Generation (RAG)**. This fusion allows us to not only identify which components are affected but also provide an LLM-driven explanation, risk score, and recommended mitigation actions—all packaged into a concise, ready-to-post Pull Request comment.
 
@@ -230,5 +230,6 @@ For further improvements consider:
 
 
 **_Last updated: 2025-11-21_**
+
 
 
