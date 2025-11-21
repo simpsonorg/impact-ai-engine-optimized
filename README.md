@@ -1,13 +1,13 @@
 <!-- filepath: c:\data\maincode\impact-ai-engine-optimized-main\README.md -->
 # 🚀 Optimized Impact Analyzer Engine
 
-🎯 Stop the Fire Drill: Precise Impact Analysis for Microservices
+🎯 Stop the Fire Drill: Precise Impact Analysis for Services, APIs & Infrastructure
 
 🌟 Project Overview
 
-The Optimized Impact Analyzer Engine is a specialized, reproducible analysis tool designed to eliminate guesswork in complex microservice environments. When a developer submits a code change, this engine executes in CI to build a dynamic knowledge graph of the entire landscape, accurately tracing the downstream ripple effect of the change.
+The Optimized Impact Analyzer Engine is a specialized, reproducible analysis tool designed to eliminate guesswork in complex service and infrastructure environments. When a developer submits a code change, this engine executes in CI to build a dynamic knowledge graph of the entire landscape (microservices, API gateways, client SDKs, Nginx/Apigee configs, CRUD services, and databases), accurately tracing the downstream ripple effect of the change.
 
-Our core innovation lies in the seamless integration of knowledge graph pathfinding (NetworkX) with Retrieval-Augmented Generation (RAG). This fusion allows us to not only identify which services are affected but also provide an LLM-driven explanation, risk score, and recommended mitigation actions—all packaged into a concise, ready-to-post Pull Request comment.
+Our core innovation lies in the seamless integration of knowledge graph pathfinding (NetworkX) with Retrieval-Augmented Generation (RAG). This fusion allows us to not only identify which components are affected but also provide an LLM-driven explanation, risk score, and recommended mitigation actions—all packaged into a concise, ready-to-post Pull Request comment.
 
 The result is instant, high-confidence feedback, transforming code review from a manual, error-prone process into an automated, data-driven security and stability check.
 
@@ -15,12 +15,18 @@ The result is instant, high-confidence feedback, transforming code review from a
 
 ## Key Features
 
-- 🌐 Microservice Discovery — Intelligently scans the repository to discover service folders, code artifacts, and service-to-service dependencies via import/URL/contract analysis.
-- 🧠 Knowledge Graph Mapping — Builds an enriched, directed NetworkX graph, calculating metrics like PageRank and Centrality to prioritize critical services.
+- 🌐 Repository & Artifact Discovery — Intelligently scans repositories to discover services, APIs, gateways, configuration and contract artifacts.
+  - What this means: locates folders, code, OpenAPI/proto contracts and infra configs (Nginx/Apigee) across any repo.
+- 🧠 Knowledge Graph Mapping — Builds an enriched, directed NetworkX graph, calculating metrics like PageRank and Centrality to prioritize critical components.
+  - What this means: models components as graph nodes and communications as edges so pathfinding and centrality reveal high-impact areas.
 - 🔎 Change-to-Impact Pathing — Maps specific changed files to starting nodes and computes the full downstream impact path across the graph.
+  - What this means: determines which services, APIs or infra pieces downstream may be affected by a change.
 - 📚 Contextual Retrieval (RAG) — Chunks and embeds relevant code snippets, using nearest-neighbor search (FAISS/NumPy) to retrieve highly specific context for LLM analysis.
+  - What this means: supplies evidence (code hunks/config lines) to the LLM so findings are explainable and auditable.
 - 🤖 LLM-Driven Risk Analysis — Orchestrates the language model (OpenAI/Gemini) to produce a structured `impact-summary.json` artifact and a rich HTML/Markdown PR comment.
-- 📈 Risk Quantification — Generates a normalized risk estimate (0-100) based on path complexity, service centrality, and content analysis.
+  - What this means: generates both machine-readable data for automation and reviewer-friendly markdown for PRs.
+- 📈 Risk Quantification — Generates a normalized risk estimate (0-100) based on path complexity, component centrality, and content analysis.
+  - What this means: summarizes severity using graph metrics and contextual heuristics to help reviewers prioritize.
 
 ---
 
@@ -221,5 +227,6 @@ For further improvements consider:
 - Provide optional local FAISS index building for faster retrieval during demo runs
 
 ---
+
 
 _Last updated: 2025-11-21_
