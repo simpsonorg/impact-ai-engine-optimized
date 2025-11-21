@@ -3,3 +3,5 @@ faiss-cpu
 numpy
 networkx
 httpx
+pyyaml
+esprima
