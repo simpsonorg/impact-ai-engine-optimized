@@ -47,37 +47,119 @@ def compact_snippets_text(snippets, limit=6):
 
 def build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Build a strict prompt that asks the LLM to return ONLY Markdown:
-    - Top summary table
-    - Per-service tables with specific columns
-    - Recommended test list
-    - Final guidance paragraph
+    Build a prompt that asks the LLM to return a visually appealing,
+    GitHub-compatible impact dashboard using Markdown + simple HTML.
+    (No CSS, no JS, no external assets.)
     """
     snippet_block = compact_snippets_text(snippets, limit=6) if snippets else "No code snippets available."
     prompt = f"""
-You are an expert software architect. Produce a GitHub PR impact comment in PURE MARKDOWN ONLY (no HTML).
-Return the following sections **exactly** (use Markdown tables where indicated):
+You are an expert software architect. Produce a **visually rich GitHub PR Impact Dashboard** using
+**GitHub-compatible Markdown and simple inline HTML only**.
 
-1) Top-level summary table with columns:
-| Severity | Impacted Services | Changed Files Count | Recommendation |
-|---:|---|---:|---|
+GOAL:
+- The output will be posted as a GitHub Pull Request comment.
+- It must look like a small dashboard: sections, cards, tables, and emojis.
+- You may use: <div>, <h1>–<h4>, <table>, <thead>, <tbody>, <tr>, <td>, <details>, <summary>, <b>, <i>, <blockquote>, <hr>.
+- DO NOT use: <style>, <script>, external CSS/JS, iframes, or code fences (no ```).
 
-2) A short "Summary" paragraph (2-4 sentences).
+STRUCTURE (follow this high-level layout):
 
-3) For each impacted service produce a table with columns:
-| Service | Impact Level | Reason | Files Changed | Suggested Tests | Recommended Actions | Potential Risks | Suggested Reviewers |
-|---|---|---|---|---|---|---|---|
+-------------------------------------------------------------------------------
+1) HEADER SECTION – "Impact Dashboard"
+-------------------------------------------------------------------------------
+Use a container like:
 
-- Fill the table rows. Keep text concise (1-3 short sentences per cell).
-- Files Changed should be comma-separated relative paths.
-- Suggested Tests should be a comma-separated list (or 'N/A').
-- Suggested Reviewers should be GitHub handles if known or team names.
+<div>
+  <h1>🚀 PR Impact Dashboard</h1>
+  <p>Short 1–2 sentence intro for reviewers.</p>
+</div>
 
-4) "Recommended Tests" section as a Markdown bulleted list (4-7 items).
+-------------------------------------------------------------------------------
+2) TOP SUMMARY CARD (HTML TABLE)
+-------------------------------------------------------------------------------
+Render a compact HTML table with this schema:
 
-5) "Final Reviewer Guidance" short paragraph (2-4 lines).
+<table>
+  <thead>
+    <tr>
+      <th>Severity</th>
+      <th>Impacted Services</th>
+      <th>Changed Files</th>
+      <th>Recommendation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🟢 / 🟡 / 🔴 with text (LOW / MEDIUM / HIGH)</td>
+      <td>Comma-separated service names</td>
+      <td>Total count of changed files</td>
+      <td>1–2 line high-level recommendation</td>
+    </tr>
+  </tbody>
+</table>
 
-CONTEXT (do not print this block; use it to reason):
+Use emojis for severity:
+- 🟢 LOW
+- 🟡 MEDIUM
+- 🔴 HIGH
+
+-------------------------------------------------------------------------------
+3) SUMMARY SECTION
+-------------------------------------------------------------------------------
+Use a heading and short paragraph block:
+
+<h2>📝 Summary</h2>
+<p>Write 2–4 concise sentences explaining what this PR changes, how the changed
+files affect behavior, and any notable upstream/downstream impacts.</p>
+
+-------------------------------------------------------------------------------
+4) PER-SERVICE IMPACT (DETAILS CARDS)
+-------------------------------------------------------------------------------
+For each impacted service, render a collapsible card using <details>:
+
+<details open>
+  <summary>🧱 <b>&lt;service-name&gt;</b> – impact overview</summary>
+
+  <p><b>Why impacted:</b> 1–2 sentence explanation.</p>
+
+  <p><b>Files to review:</b></p>
+  <ul>
+    <li>List actual changed files that map to this service.</li>
+  </ul>
+
+  <p><b>Recommended actions:</b></p>
+  <ul>
+    <li>Concrete action 1</li>
+    <li>Concrete action 2</li>
+  </ul>
+
+  <p><b>Risk level:</b> LOW / MEDIUM / HIGH</p>
+  <p><b>Suggested reviewers:</b> GitHub handles or "TBD"</p>
+</details>
+
+Keep text concise and easy to scan.
+
+-------------------------------------------------------------------------------
+5) RECOMMENDED TESTS
+-------------------------------------------------------------------------------
+<h2>🧪 Recommended Test Coverage</h2>
+<ul>
+  <li>4–7 bullet points with specific test ideas (end-to-end, contracts, schema,
+      negative flows, performance, etc.).</li>
+</ul>
+
+-------------------------------------------------------------------------------
+6) FINAL REVIEWER GUIDANCE
+-------------------------------------------------------------------------------
+<h2>🧠 Final Reviewer Guidance</h2>
+<blockquote>
+  2–4 sentence advisory to the reviewer about what to double-check,
+  integration risks, rollback considerations, and a rough confidence level.
+</blockquote>
+
+-------------------------------------------------------------------------------
+INPUT CONTEXT (DO NOT PRINT THIS SECTION)
+-------------------------------------------------------------------------------
 
 PR Title:
 {pr_title}
@@ -95,16 +177,18 @@ Relevant code snippets (for reasoning):
 {snippet_block}
 
 RULES:
-- OUTPUT MUST BE PURE MARKDOWN. Do NOT include any explanations outside the requested sections.
-- Avoid hallucination: if you don't know reviewers or tests, write 'TBD' or 'N/A'.
-- Keep each table cell reasonably short. Use line breaks (<br>) if multiple short items are needed.
+- OUTPUT MUST BE A SINGLE GitHub COMMENT BODY USING MARKDOWN + SIMPLE HTML ONLY.
+- DO NOT wrap the entire output in ``` or any sort of code fence.
+- DO NOT include raw JSON dumps in the output.
+- DO NOT include this context section in the output.
+- If uncertain about tests or reviewers, use 'TBD' or 'N/A' instead of hallucinating.
 """
     return prompt
 
 
 def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Produce a Markdown report. If OpenAI available, request Markdown via prompt;
+    Produce a Markdown/HTML report. If OpenAI available, request via prompt;
     otherwise construct a deterministic Markdown summary from graph + changed files.
     """
     # Basic inputs normalization
@@ -114,7 +198,7 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     # Severity estimate
     severity = severity_from_count(len(impacted_services))
 
-    # If OpenAI is available, ask it to produce pure Markdown (RAG-enhanced prompt)
+    # If OpenAI is available, ask it to produce Markdown/HTML (RAG-enhanced prompt)
     if _openai is not None:
         prompt = build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets)
         try:
@@ -125,18 +209,22 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
                 temperature=0.12,
             )
             content = resp.choices[0].message.content
-            # enforce that it returns markdown only; if not, fallback to deterministic
+            # enforce that it returns content; if not, fallback to deterministic
             if not content.strip():
                 raise ValueError("LLM returned empty content")
             return content
         except Exception as e:
             # fall back to deterministic markdown below but include an error header
             fallback_header = f"> **⚠️ LLM failed:** {str(e)}\n\n"
-            deterministic = _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
+            deterministic = _build_deterministic_markdown(
+                pr_title, changed_files, impacted_services, graph_json, snippets, severity
+            )
             return fallback_header + deterministic
 
     # No OpenAI configured: deterministic markdown
-    return _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
+    return _build_deterministic_markdown(
+        pr_title, changed_files, impacted_services, graph_json, snippets, severity
+    )
 
 
 def _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity):
@@ -145,7 +233,8 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
     top_table = (
         "| Severity | Impacted Services | Changed Files Count | Recommendation |\n"
         "|---:|---|---:|---|\n"
-        f"| **{md_escape(severity)}** | {md_escape(impacted_display)} | {len(changed_files)} | {md_escape('Run integration tests across impacted services; coordinate schema changes.') } |\n"
+        f"| **{md_escape(severity)}** | {md_escape(impacted_display)} | {len(changed_files)} | "
+        f"{md_escape('Run integration tests across impacted services; coordinate schema changes.')} |\n"
     )
 
     # Summary paragraph
@@ -199,7 +288,8 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
             + md_escape(suggested_reviewers) + " |\n"
         )
         header = (
-            "| Service | Impact Level | Reason | Files Changed | Suggested Tests | Recommended Actions | Potential Risks | Suggested Reviewers |\n"
+            "| Service | Impact Level | Reason | Files Changed | Suggested Tests | "
+            "Recommended Actions | Potential Risks | Suggested Reviewers |\n"
             "|---|---|---|---|---|---|---|---|\n"
         )
         per_service_sections.append(f"### {md_escape(svc)}\n\n{header}{svc_row}")
