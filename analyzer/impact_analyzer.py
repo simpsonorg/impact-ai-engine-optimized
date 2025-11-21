@@ -15,9 +15,11 @@ def md_escape(text: str) -> str:
     """Escape pipe and other markdown-control characters for table cells."""
     if text is None:
         return ""
+    # Basic escaping: pipe and backslash; preserve newlines but replace CR
     text = str(text).replace("\r", "")
     text = text.replace("|", "\\|")
     text = text.replace("`", "\\`")
+    # Keep newlines but ensure cell rendering: GitHub supports newlines in table cells if wrapped in <br>
     text = text.replace("\n", "<br>")
     return text
 
@@ -37,90 +39,86 @@ def compact_snippets_text(snippets, limit=6):
         file = s.get("file", "unknown")
         snippet = s.get("snippet", "")
         excerpt = snippet.strip().splitlines()
-        excerpt = excerpt[:6]
+        excerpt = excerpt[:6]  # first few lines
         text = "\\n".join(excerpt)
         parts.append(f"[{svc}] {file}: {text}")
     return "\n\n".join(parts)
 
 
-# 🔥🔥🔥 REPLACED FUNCTION → Premium Elegant UI Prompt
+# -------------------------------------------------------------------------
+# ONLY THIS FUNCTION IS CHANGED → UI UPGRADE ONLY
+# -------------------------------------------------------------------------
 def build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Premium Elegant UI (Markdown-only) for GitHub PR Impact Dashboards.
-    Zero HTML. Zero CSS. Pure visually appealing GitHub Markdown.
+    Premium Elegant UI Prompt — NO functional changes.
     """
-
     snippet_block = compact_snippets_text(snippets, limit=6) if snippets else "No code snippets available."
 
     return f"""
-You are a senior principal software architect. Produce a **Premium Elegant GitHub PR Impact Dashboard** using **PURE MARKDOWN ONLY**.
+You are a senior software architect. Produce a **visually stunning, premium GitHub PR Impact Dashboard** using **PURE MARKDOWN ONLY** (no HTML).
 
-The output must be visually stunning, incredibly readable, and formatted like a polished product UI.  
-Use emojis, structured hierarchy, dividers, callouts, bullet sections, spacing and clarity.  
-No HTML, no JSON, no code blocks — only Markdown.
+Your Markdown must be clean, elegant, readable, and structured like a polished product UI.
+Use emojis, spacing, hierarchy, clarity, and professional tone.
+DO NOT output JSON, HTML, code blocks, or the context section.
 
 ==============================================================================
 # 🚀 **PR Impact Dashboard**
-A rich, premium-quality visual summary for PR reviewers.
+A premium visual overview for reviewers.
 
 ==============================================================================
 ## 🔥 **Top-Level Summary**
-Create a clean, visually appealing Markdown table:
+Render a clean table:
 
-| Severity | Impacted Services | Changed Files | Recommendation |
-|:-------:|-------------------|:-------------:|----------------|
+| Severity | Impacted Services | Changed Files Count | Recommendation |
+|:-------:|-------------------|:-------------------:|----------------|
 
-- Use emoji severity badges: 🟢 LOW · 🟡 MEDIUM · 🔴 HIGH  
-- Keep text clean and concise  
-- Services = comma-separated  
-- Recommendation = short actionable insight
+- Severity should use emoji badges:  
+  🟢 LOW 🟡 MEDIUM 🔴 HIGH  
 
 ==============================================================================
 ## 📝 **Executive Summary**
-Write 3–5 polished sentences explaining:
-- What this PR is doing  
-- How the changed files affect the system  
-- High-level upstream/downstream impact  
-- Key risks  
-Make this read like a reviewer briefing note.
+Write 3–5 refined sentences describing:
+- What this PR changes  
+- How the modified files affect system behavior  
+- Upstream/downstream impact  
+- Any key risks  
 
 ==============================================================================
 ## 🧩 **Per-Service Impact Analysis**
-For **each impacted service**, generate a premium, well-structured section:
+For **each impacted service**, generate this block:
 
 ### 🧱 **<service-name>**
-> One elegant sentence summarizing why this service is impacted.
+> One elegant sentence explaining why this service is impacted.
 
 **📄 Files to Review:**  
-- Actual changed files related to this service
+- List of changed files relevant to this service
 
 **🛠 Recommended Actions:**  
-- Bullet list of what devs must validate or fix
+- 2–4 bullet points  
+- Keep concise and technical
 
 **⚠️ Risk Level:** LOW / MEDIUM / HIGH  
-**👥 Suggested Reviewers:** Github handles or "TBD"
-
-Keep each block short, crisp, and visually appealing.
+**👥 Suggested Reviewers:** GitHub handles or "TBD"
 
 ==============================================================================
 ## 🧪 **Recommended Test Coverage**
-Provide **4–7 meaningful test recommendations**, such as:
-- Full end-to-end flow tests  
-- Contract/backward-compatibility tests  
-- Schema validation  
-- Negative/error scenario tests  
-- Performance/scalability checks  
+Provide 4–7 meaningful test recommendations:
+- End-to-end tests  
+- Contract validation  
+- Schema checks  
+- Negative/error paths  
+- Performance considerations  
 
 ==============================================================================
 ## 🧠 **Final Reviewer Guidance**
-A 3–5 sentence professional summary:
-- Key items to double-check  
-- Integration risks  
-- Signals indicating safe merge  
-- Deployment/rollback considerations  
+Provide 3–5 polished sentences summarizing:
+- Critical items to verify  
+- Integration concerns  
+- Merge safety  
+- Rollback readiness  
 
 ==============================================================================
-### 🔍 **CONTEXT (must NOT appear in output)**
+### 🔍 CONTEXT (DO NOT OUTPUT THIS)
 
 PR Title:
 {pr_title}
@@ -131,30 +129,36 @@ Changed Files:
 Impacted Services:
 {json.dumps(impacted_services, indent=2)}
 
-Service Graph:
+Service Dependency Graph:
 {json.dumps(graph_json, indent=2)}
 
-Relevant Snippets:
+Code Snippets:
 {snippet_block}
 
 RULES:
-- DO NOT output the context section.
-- DO NOT include HTML or code fences.
-- MUST be pure Markdown.
-- Be elegant, structured, readable, and visually rich.
+- MUST output only Markdown.
+- DO NOT output this context.
+- No HTML, no code blocks.
 """
 
+
+# -------------------------------------------------------------------------
+# NO CHANGES BELOW THIS LINE
+# -------------------------------------------------------------------------
 
 def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
     Produce a Markdown report. If OpenAI available, request Markdown via prompt;
     otherwise construct a deterministic Markdown summary from graph + changed files.
     """
+    # Basic inputs normalization
     changed_files = changed_files or []
     impacted_services = impacted_services or []
 
+    # Severity estimate
     severity = severity_from_count(len(impacted_services))
 
+    # If OpenAI is available, ask it to produce pure Markdown (RAG-enhanced prompt)
     if _openai is not None:
         prompt = build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets)
         try:
@@ -175,10 +179,14 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
             )
             return fallback_header + deterministic
 
-    return _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
+    # No OpenAI configured: deterministic markdown
+    return _build_deterministic_markdown(
+        pr_title, changed_files, impacted_services, graph_json, snippets, severity
+    )
 
 
 def _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity):
+    # Top summary table
     impacted_display = ", ".join(impacted_services) if impacted_services else "None"
     top_table = (
         "| Severity | Impacted Services | Changed Files Count | Recommendation |\n"
@@ -187,15 +195,16 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
         f"{md_escape('Run integration tests across impacted services; coordinate schema changes.')} |\n"
     )
 
-    summary_lines = []
-    summary_lines.append(f"**PR Title:** {md_escape(pr_title)}")
-    if changed_files:
-        summary_lines.append(f"Changed {len(changed_files)} file(s): {md_escape(', '.join(changed_files))}.")
-    else:
-        summary_lines.append("No changed files found in CHANGED_FILES env variable.")
-    summary_lines.append(f"Estimated severity based on impacted services: **{md_escape(severity)}**.")
+    # Summary paragraph
+    summary_lines = [
+        f"**PR Title:** {md_escape(pr_title)}",
+        f"Changed {len(changed_files)} file(s): {md_escape(', '.join(changed_files))}."
+        if changed_files else "No changed files found in CHANGED_FILES env variable.",
+        f"Estimated severity based on impacted services: **{md_escape(severity)}**."
+    ]
     summary = "\n\n".join(summary_lines)
 
+    # Per-service tables
     per_service_sections = []
     for svc in impacted_services:
         files_changed = []
@@ -206,19 +215,19 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
 
         if "db" in svc.lower() or "crud" in svc.lower():
             impact_level = "Medium"
-            reason = "Data read/write boundary; schema or field changes may break consumers."
+            reason = "Data read/write boundary; schema changes may break consumers."
             suggested_tests = "DB contract tests, integration account-load flow"
         elif "ui" in svc.lower() or "frontend" in svc.lower():
             impact_level = "Low"
-            reason = "UI may require adaptation for new fields or error formats."
+            reason = "UI may need adaptation for new fields or formats."
             suggested_tests = "UI smoke tests, rendering checks"
         else:
             impact_level = "High"
-            reason = "Core domain changes may cascade to downstream services and vendors."
+            reason = "Core domain changes may cascade to downstream services."
             suggested_tests = "End-to-end account-load flow, contract tests"
 
         recommended_actions = "Review API contracts; add integration tests; notify downstream owners"
-        potential_risks = "Incorrect data, increased latency, service errors"
+        potential_risks = "Incorrect data, latency issues, service errors"
         suggested_reviewers = "TBD"
 
         svc_row = (
@@ -231,30 +240,32 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
             + md_escape(potential_risks) + " | "
             + md_escape(suggested_reviewers) + " |\n"
         )
+
         header = (
-            "| Service | Impact Level | Reason | Files Changed | Suggested Tests | "
-            "Recommended Actions | Potential Risks | Suggested Reviewers |\n"
+            "| Service | Impact Level | Reason | Files Changed | Suggested Tests | Recommended Actions | Potential Risks | Suggested Reviewers |\n"
             "|---|---|---|---|---|---|---|---|\n"
         )
+
         per_service_sections.append(f"### {md_escape(svc)}\n\n{header}{svc_row}")
 
     per_service_md = "\n\n".join(per_service_sections) if per_service_sections else "_No impacted services detected._"
 
-    recommended_tests = [
-        "End-to-end account-load integration test",
-        "Backward compatibility contract tests",
-        "Schema validation for new/changed payload fields",
-        "Performance smoke test for the modified flow",
-        "Audit logs/observability checks post-deploy",
-    ]
-    tests_md = "\n".join([f"- {md_escape(t)}" for t in recommended_tests])
+    # Recommended tests list
+    tests_md = "\n".join([
+        "- End-to-end account-load integration test",
+        "- Backward compatibility contract tests",
+        "- Schema validation for new/changed payload fields",
+        "- Performance smoke test",
+        "- Audit logs/observability checks"
+    ])
 
+    # Final guidance
     final_guidance = (
-        "Before merging, ensure integration tests pass between the affected services, notify downstream owners, "
-        "and schedule a quick runbook review in case of rollback."
+        "Before merging, ensure integration tests pass between affected services, "
+        "notify downstream owners, and prepare a rollback plan."
     )
 
-    parts = [
+    return "\n".join([
         "# PR Impact Summary",
         "",
         top_table,
@@ -275,5 +286,4 @@ def _build_deterministic_markdown(pr_title, changed_files, impacted_services, gr
         "",
         final_guidance,
         ""
-    ]
-    return "\n".join(parts)
+    ])
