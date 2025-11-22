@@ -47,119 +47,145 @@ def compact_snippets_text(snippets, limit=6):
 
 def build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Build a prompt that asks the LLM to return a visually appealing,
-    GitHub-compatible impact dashboard using Markdown + simple HTML.
-    (No CSS, no JS, no external assets.)
+    Build a premium Markdown-only prompt:
+    - Dashboard-style summary (cards/tables)
+    - Engineering deep-dive per service
+    - Recommended tests + reviewer guidance
     """
     snippet_block = compact_snippets_text(snippets, limit=6) if snippets else "No code snippets available."
+
     prompt = f"""
-You are an expert software architect. Produce a **visually rich GitHub PR Impact Dashboard** using
-**GitHub-compatible Markdown and simple inline HTML only**.
+You are a senior software architect. Generate a **Premium GitHub PR Impact Dashboard** using **pure Markdown only**.
+The result will be posted as a GitHub Pull Request comment.
 
-GOAL:
-- The output will be posted as a GitHub Pull Request comment.
-- It must look like a small dashboard: sections, cards, tables, and emojis.
-- You may use: <div>, <h1>–<h4>, <table>, <thead>, <tbody>, <tr>, <td>, <details>, <summary>, <b>, <i>, <blockquote>, <hr>.
-- DO NOT use: <style>, <script>, external CSS/JS, iframes, or code fences (no ```).
+Your style should combine:
+- A clean, high-level dashboard summary (Option A)
+- A deeper engineering analysis per impacted service (Option B)
 
-STRUCTURE (follow this high-level layout):
+Do NOT use HTML tags. Use only Markdown: headings, lists, tables, blockquotes, and emojis.
 
--------------------------------------------------------------------------------
-1) HEADER SECTION – "Impact Dashboard"
--------------------------------------------------------------------------------
-Use a container like:
+======================================================================
+# 1️⃣ HEADER
+======================================================================
 
-<div>
-  <h1>🚀 PR Impact Dashboard</h1>
-  <p>Short 1–2 sentence intro for reviewers.</p>
-</div>
+Start with:
 
--------------------------------------------------------------------------------
-2) TOP SUMMARY CARD (HTML TABLE)
--------------------------------------------------------------------------------
-Render a compact HTML table with this schema:
+# 🚀 PR Impact Dashboard
 
-<table>
-  <thead>
-    <tr>
-      <th>Severity</th>
-      <th>Impacted Services</th>
-      <th>Changed Files</th>
-      <th>Recommendation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>🟢 / 🟡 / 🔴 with text (LOW / MEDIUM / HIGH)</td>
-      <td>Comma-separated service names</td>
-      <td>Total count of changed files</td>
-      <td>1–2 line high-level recommendation</td>
-    </tr>
-  </tbody>
-</table>
+Then add 1 short sentence describing the PR impact at a high level.
 
-Use emojis for severity:
-- 🟢 LOW
-- 🟡 MEDIUM
-- 🔴 HIGH
+======================================================================
+# 2️⃣ IMPACT SUMMARY (DASHBOARD CARDS)
+======================================================================
 
--------------------------------------------------------------------------------
-3) SUMMARY SECTION
--------------------------------------------------------------------------------
-Use a heading and short paragraph block:
+Render a compact summary table:
 
-<h2>📝 Summary</h2>
-<p>Write 2–4 concise sentences explaining what this PR changes, how the changed
-files affect behavior, and any notable upstream/downstream impacts.</p>
+| Metric | Value |
+|--------|-------|
+| Severity | one of: 🟢 LOW / 🟡 MEDIUM / 🔴 HIGH |
+| Impacted Services | number of impacted services + short list |
+| Changed Files | total count of changed files |
+| Risk Profile | short phrase (e.g., "Localized", "Cross-service", "High blast radius") |
+| Recommended Action | short action phrase ("Run full E2E", "Focus on contracts", etc.) |
 
--------------------------------------------------------------------------------
-4) PER-SERVICE IMPACT (DETAILS CARDS)
--------------------------------------------------------------------------------
-For each impacted service, render a collapsible card using <details>:
+Choose severity, risk profile, and recommended action based on the context.
 
-<details open>
-  <summary>🧱 <b>&lt;service-name&gt;</b> – impact overview</summary>
+======================================================================
+# 3️⃣ HIGH-LEVEL SUMMARY (ENGINEERING NARRATIVE)
+======================================================================
 
-  <p><b>Why impacted:</b> 1–2 sentence explanation.</p>
+Section heading:
 
-  <p><b>Files to review:</b></p>
-  <ul>
-    <li>List actual changed files that map to this service.</li>
-  </ul>
+## 📝 High-Level Summary
 
-  <p><b>Recommended actions:</b></p>
-  <ul>
-    <li>Concrete action 1</li>
-    <li>Concrete action 2</li>
-  </ul>
+Write 3–5 sentences that:
+- Explain what this PR does using the PR title and changed files.
+- Describe how the changes affect upstream/downstream services or contracts.
+- Mention any notable schema, API, or behavioral changes.
+- Briefly call out main risks.
 
-  <p><b>Risk level:</b> LOW / MEDIUM / HIGH</p>
-  <p><b>Suggested reviewers:</b> GitHub handles or "TBD"</p>
-</details>
+Keep it clear and readable for reviewers.
 
-Keep text concise and easy to scan.
+======================================================================
+# 4️⃣ PER-SERVICE IMPACT DEEP DIVE
+======================================================================
 
--------------------------------------------------------------------------------
-5) RECOMMENDED TESTS
--------------------------------------------------------------------------------
-<h2>🧪 Recommended Test Coverage</h2>
-<ul>
-  <li>4–7 bullet points with specific test ideas (end-to-end, contracts, schema,
-      negative flows, performance, etc.).</li>
-</ul>
+Heading:
 
--------------------------------------------------------------------------------
-6) FINAL REVIEWER GUIDANCE
--------------------------------------------------------------------------------
-<h2>🧠 Final Reviewer Guidance</h2>
-<blockquote>
-  2–4 sentence advisory to the reviewer about what to double-check,
-  integration risks, rollback considerations, and a rough confidence level.
-</blockquote>
+## 🧩 Service Impact Deep Dive
 
--------------------------------------------------------------------------------
-INPUT CONTEXT (DO NOT PRINT THIS SECTION)
--------------------------------------------------------------------------------
+For EACH impacted service, create a subsection:
+
+### 🧱 <service-name>
+
+Then include the following structure in Markdown:
+
+- **Role in system:** 1 short sentence (e.g., "API gateway for account load requests").
+- **Why impacted:** 1–3 sentences explaining why this PR touches this service.
+- **Key changes:**
+  - Bullet list of 2–4 concrete changes related to this service.
+- **Risk level:** LOW / MEDIUM / HIGH (and a short justification).
+- **Files to review:**
+  - Bullet list of actual changed files associated with this service (if any).
+- **Recommended tests:**
+  - 2–5 bullets with specific, realistic tests for this service.
+- **Potential failure modes:**
+  - 2–4 bullets describing how things could break.
+- **Suggested reviewers:** GitHub handles, team names, or "TBD".
+
+If a service has no directly mapped files but is impacted via the graph, explain that it is downstream/upstream.
+
+======================================================================
+# 5️⃣ CROSS-SERVICE / GRAPH INSIGHTS
+======================================================================
+
+Heading:
+
+## 🔗 Cross-Service & Dependency Insights
+
+Use 2–5 bullet points to describe:
+- Which services are central or high-risk from the graph.
+- Any downstream services that might be indirectly affected.
+- Whether blast radius is mostly internal or spans external vendors.
+- Any notable contracts or schemas in the dependency graph.
+
+Base this on the service dependency graph JSON and snippets.
+
+======================================================================
+# 6️⃣ RECOMMENDED TEST COVERAGE
+======================================================================
+
+Heading:
+
+## 🧪 Recommended Test Coverage
+
+Produce 5–10 bullet points combining:
+- End-to-end scenarios (e.g., full account load flow).
+- API/contract compatibility tests.
+- Schema validation.
+- Negative/error path tests.
+- Performance or latency checks if appropriate.
+- Observability/logging/alerting validation.
+
+Make each bullet practical and concrete.
+
+======================================================================
+# 7️⃣ FINAL REVIEWER GUIDANCE
+======================================================================
+
+Heading:
+
+## 🧠 Final Reviewer Guidance
+
+Write 3–6 sentences that:
+- Summarize the overall risk and confidence.
+- Call out what the reviewer MUST pay attention to (e.g., contracts, DB migrations).
+- Suggest whether a staged rollout or feature flag is advisable.
+- Mention any recommended follow-up monitoring after deployment.
+
+======================================================================
+CONTEXT (DO NOT PRINT THIS SECTION)
+======================================================================
 
 PR Title:
 {pr_title}
@@ -173,22 +199,21 @@ Impacted services:
 Service dependency graph (JSON):
 {json.dumps(graph_json, indent=2)}
 
-Relevant code snippets (for reasoning):
+Relevant code snippets (for reasoning only, do NOT print raw):
 {snippet_block}
 
 RULES:
-- OUTPUT MUST BE A SINGLE GitHub COMMENT BODY USING MARKDOWN + SIMPLE HTML ONLY.
-- DO NOT wrap the entire output in ``` or any sort of code fence.
-- DO NOT include raw JSON dumps in the output.
-- DO NOT include this context section in the output.
-- If uncertain about tests or reviewers, use 'TBD' or 'N/A' instead of hallucinating.
+- OUTPUT MUST BE PURE MARKDOWN (NO HTML, NO CODE FENCES).
+- DO NOT include the "CONTEXT" section or any raw JSON in the output.
+- Avoid hallucination: if unsure about reviewers/tests, use 'TBD' or 'N/A'.
+- Keep the tone professional, concise, and helpful for PR reviewers.
 """
     return prompt
 
 
 def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     """
-    Produce a Markdown/HTML report. If OpenAI available, request via prompt;
+    Produce a Markdown report. If OpenAI available, request Markdown via prompt;
     otherwise construct a deterministic Markdown summary from graph + changed files.
     """
     # Basic inputs normalization
@@ -198,7 +223,7 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
     # Severity estimate
     severity = severity_from_count(len(impacted_services))
 
-    # If OpenAI is available, ask it to produce Markdown/HTML (RAG-enhanced prompt)
+    # If OpenAI is available, ask it to produce pure Markdown (RAG-enhanced prompt)
     if _openai is not None:
         prompt = build_llm_prompt_markdown(pr_title, changed_files, impacted_services, graph_json, snippets)
         try:
@@ -209,7 +234,7 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
                 temperature=0.12,
             )
             content = resp.choices[0].message.content
-            # enforce that it returns content; if not, fallback to deterministic
+            # enforce that it returns markdown only; if not, fallback to deterministic
             if not content.strip():
                 raise ValueError("LLM returned empty content")
             return content
@@ -222,117 +247,154 @@ def analyze(pr_title, changed_files, impacted_services, graph_json, snippets):
             return fallback_header + deterministic
 
     # No OpenAI configured: deterministic markdown
-    return _build_deterministic_markdown(
-        pr_title, changed_files, impacted_services, graph_json, snippets, severity
-    )
+    return _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity)
 
 
 def _build_deterministic_markdown(pr_title, changed_files, impacted_services, graph_json, snippets, severity):
-    # Top summary table
+    """
+    Deterministic Markdown fallback, upgraded to match the premium dashboard style.
+    Logic is the same; only formatting/text is richer.
+    """
     impacted_display = ", ".join(impacted_services) if impacted_services else "None"
+
+    # Map severity to emoji for nicer UI (UI-only change)
+    severity_label = severity
+    if severity == "HIGH":
+        severity_display = "🔴 HIGH"
+    elif severity == "MEDIUM":
+        severity_display = "🟡 MEDIUM"
+    else:
+        severity_display = "🟢 LOW"
+
+    # 1) Top dashboard summary table
     top_table = (
-        "| Severity | Impacted Services | Changed Files Count | Recommendation |\n"
-        "|---:|---|---:|---|\n"
-        f"| **{md_escape(severity)}** | {md_escape(impacted_display)} | {len(changed_files)} | "
-        f"{md_escape('Run integration tests across impacted services; coordinate schema changes.')} |\n"
+        "| Metric | Value |\n"
+        "|--------|-------|\n"
+        f"| Severity | **{md_escape(severity_display)}** |\n"
+        f"| Impacted Services | {md_escape(impacted_display)} |\n"
+        f"| Changed Files | {len(changed_files)} |\n"
+        f"| Recommended Action | {md_escape('Run integration tests across impacted services; coordinate schema changes.')} |\n"
     )
 
-    # Summary paragraph
+    # 2) High-level summary
     summary_lines = []
     summary_lines.append(f"**PR Title:** {md_escape(pr_title)}")
     if changed_files:
-        summary_lines.append(f"Changed {len(changed_files)} file(s): {md_escape(', '.join(changed_files))}.")
+        summary_lines.append(
+            f"**Changed files ({len(changed_files)}):** {md_escape(', '.join(changed_files))}."
+        )
     else:
-        summary_lines.append("No changed files found in CHANGED_FILES env variable.")
-    summary_lines.append(f"Estimated severity based on impacted services: **{md_escape(severity)}**.")
+        summary_lines.append("**Changed files:** No changed files found in CHANGED_FILES env variable.")
+    summary_lines.append(f"**Estimated severity (based on impacted services):** {md_escape(severity_display)}.")
+    summary_lines.append(
+        "This change may affect core flows across the impacted services. Please review API contracts, "
+        "schemas, and downstream dependencies before merging."
+    )
     summary = "\n\n".join(summary_lines)
 
-    # Per-service tables
+    # 3) Per-service deep dive (in a more narrative, non-table format)
     per_service_sections = []
     for svc in impacted_services:
-        # attempt to extract files for service from graph_json (if available)
+        # attempt to extract files for service from changed_files
         files_changed = []
-        # graph_json might not contain files list; so check changed_files for path prefixes
         for cf in changed_files:
-            if cf.replace("\\", "/").startswith(svc + "/") or f"/{svc}/" in cf.replace("\\", "/"):
+            norm = cf.replace("\\", "/")
+            if norm.startswith(svc + "/") or f"/{svc}/" in norm:
                 files_changed.append(cf)
-        files_cell = md_escape(", ".join(files_changed)) if files_changed else "N/A"
 
-        # simple heuristics for impact and reasons
-        if svc.lower().find("db") >= 0 or svc.lower().find("crud") >= 0:
+        if "db" in svc.lower() or "crud" in svc.lower():
             impact_level = "Medium"
             reason = "Data read/write boundary; schema or field changes may break consumers."
-            suggested_tests = "DB contract tests, integration account-load flow"
-        elif svc.lower().find("ui") >= 0 or svc.lower().find("frontend") >= 0:
+            suggested_tests = [
+                "DB contract tests covering main entities",
+                "Integration tests for account-load or core flows hitting this DB",
+            ]
+            risk_level = "🟡 MEDIUM"
+        elif "ui" in svc.lower() or "frontend" in svc.lower():
             impact_level = "Low"
-            reason = "UI may require adaptation for new fields or error formats."
-            suggested_tests = "UI smoke tests, rendering checks"
+            reason = "UI surface may need adaptation for new fields or error formats."
+            suggested_tests = [
+                "UI smoke tests across main screens",
+                "Rendering checks for new/changed fields",
+            ]
+            risk_level = "🟢 LOW"
         else:
             impact_level = "High"
-            reason = "Core domain changes may cascade to downstream services and vendors."
-            suggested_tests = "End-to-end account-load flow, contract tests"
+            reason = "Core domain or integration logic may cascade to downstream services and vendors."
+            suggested_tests = [
+                "End-to-end tests for impacted business flows",
+                "Contract tests for upstream/downstream APIs",
+            ]
+            risk_level = "🔴 HIGH"
 
-        recommended_actions = "Review API contracts; add integration tests; notify downstream owners"
-        potential_risks = "Incorrect data, increased latency, service errors"
-        suggested_reviewers = "TBD"
-
-        # assemble a single-row table for the service (we keep one row per service)
-        svc_row = (
-            "| " + md_escape(svc) + " | "
-            + md_escape(impact_level) + " | "
-            + md_escape(reason) + " | "
-            + files_cell + " | "
-            + md_escape(suggested_tests) + " | "
-            + md_escape(recommended_actions) + " | "
-            + md_escape(potential_risks) + " | "
-            + md_escape(suggested_reviewers) + " |\n"
+        files_list_md = (
+            "\n".join([f"- `{md_escape(f)}`" for f in files_changed]) if files_changed else "- N/A"
         )
-        header = (
-            "| Service | Impact Level | Reason | Files Changed | Suggested Tests | "
-            "Recommended Actions | Potential Risks | Suggested Reviewers |\n"
-            "|---|---|---|---|---|---|---|---|\n"
-        )
-        per_service_sections.append(f"### {md_escape(svc)}\n\n{header}{svc_row}")
+        tests_list_md = "\n".join([f"- {md_escape(t)}" for t in suggested_tests])
 
-    per_service_md = "\n\n".join(per_service_sections) if per_service_sections else "_No impacted services detected._"
+        svc_block = [
+            f"### 🧱 {md_escape(svc)}",
+            "",
+            f"- **Impact level:** {md_escape(impact_level)} ({risk_level})",
+            f"- **Why impacted:** {md_escape(reason)}",
+            "",
+            "**Files to review:**",
+            files_list_md,
+            "",
+            "**Recommended tests:**",
+            tests_list_md,
+            "",
+            "- **Recommended actions:** Review API/DB contracts, add/adjust integration tests, notify downstream owners.",
+            "- **Potential risks:** Incorrect data propagation, increased latency, or runtime errors in dependent services.",
+            "- **Suggested reviewers:** TBD",
+        ]
+        per_service_sections.append("\n".join(svc_block))
 
-    # Recommended tests list (generic)
+    per_service_md = (
+        "\n\n---\n\n".join(per_service_sections) if per_service_sections else "_No impacted services detected._"
+    )
+
+    # 4) Recommended tests list (generic + applicable to the whole PR)
     recommended_tests = [
-        "End-to-end account-load integration test",
-        "Backward compatibility contract tests",
-        "Schema validation for new/changed payload fields",
-        "Performance smoke test for the modified flow",
-        "Audit logs/observability checks post-deploy"
+        "End-to-end account-load (or equivalent) flow validation.",
+        "Backward compatibility contract tests between core services.",
+        "Schema validation for new/changed payload fields at boundaries.",
+        "Performance smoke test for the modified critical path.",
+        "Audit logs and observability checks post-deploy (dashboards/alerts).",
     ]
     tests_md = "\n".join([f"- {md_escape(t)}" for t in recommended_tests])
 
-    # Final guidance
+    # 5) Final guidance
     final_guidance = (
-        "Before merging, ensure integration tests pass between the affected services, "
-        "notify the downstream owners listed above, and schedule a quick runbook review in case of rollback."
+        "Before merging, ensure key integration tests pass for all impacted services, "
+        "validate that downstream consumers continue to function as expected, and align with "
+        "service owners on rollback and monitoring plans. If the blast radius is high, "
+        "consider a phased rollout or feature flag strategy."
     )
 
     # Assemble full document
     parts = [
-        "# PR Impact Summary",
+        "# 🚀 PR Impact Dashboard",
+        "",
+        "## 🔥 Impact Summary",
         "",
         top_table,
         "",
-        "## Summary",
+        "## 📝 High-Level Summary",
         "",
         summary,
         "",
-        "## Per-Service Impact",
+        "## 🧩 Service Impact Deep Dive",
         "",
         per_service_md,
         "",
-        "## Recommended Tests",
+        "## 🧪 Recommended Test Coverage",
         "",
         tests_md,
         "",
-        "## Final Reviewer Guidance",
+        "## 🧠 Final Reviewer Guidance",
         "",
         final_guidance,
-        ""
+        "",
     ]
     return "\n".join(parts)
