@@ -244,15 +244,7 @@ jobs:
               </div>
             </div>
 
-            <div class="chart-container">
-              <h2>Component Types Distribution</h2>
-              <canvas id="typesChart"></canvas>
-            </div>
-
-            <div class="chart-container">
-              <h2>License Distribution</h2>
-              <canvas id="licenseChart"></canvas>
-            </div>
+            
 
             <h2>Component Inventory</h2>
             <div class="search-box">
