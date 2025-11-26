@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SBOM Dashboard – Impact Delphyne</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            padding: 24px 32px;
+            background: linear-gradient(90deg,#1d4ed8,#7c3aed);
+            color: white;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        header p {
+            margin: 4px 0 0;
+            opacity: 0.9;
+        }
+        .container {
+            padding: 24px 32px 48px 32px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background: #020617;
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid #1e293b;
+            box-shadow: 0 18px 30px rgba(15,23,42,0.7);
+        }
+        .card h2 {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            color: #a5b4fc;
+        }
+        .card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .card small {
+            display: block;
+            margin-top: 4px;
+            color: #64748b;
+        }
+        h2.section-title {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            color: #c4b5fd;
+        }
+        .section {
+            margin-bottom: 32px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #1e293b;
+        }
+        th {
+            text-align: left;
+            background: #020617;
+            color: #818cf8;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        tr:nth-child(even) td {
+            background: #020617;
+        }
+        tr:nth-child(odd) td {
+            background: #020617;
+        }
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #1e293b;
+        }
+        .pill.license {
+            background: #022c22;
+            color: #6ee7b7;
+        }
+        .pill.type {
+            background: #1e293b;
+            color: #93c5fd;
+        }
+        footer {
+            padding: 16px 32px;
+            font-size: 0.8rem;
+            color: #6b7280;
+            border-top: 1px solid #111827;
+        }
+    </style>
+
+    <script>
+        // Simulated SBOM Data (Replace with your SBOM JSON if needed)
+        const sbom = {
+            generated: new Date().toISOString(),
+            components: [
+                { name: "networkx", type: "library", version: "3.3", license: "BSD-3-Clause" },
+                { name: "numpy", type: "library", version: "1.26.0", license: "BSD" },
+                { name: "openai", type: "library", version: "1.23.0", license: "MIT" },
+                { name: "faiss-cpu", type: "library", version: "1.7.4", license: "MIT" },
+                { name: "pyyaml", type: "library", version: "6.0.1", license: "MIT" },
+                { name: "fastapi", type: "framework", version: "0.110.0", license: "MIT" },
+                { name: "uvicorn", type: "server", version: "0.30.0", license: "BSD-3-Clause" },
+                { name: "GitPython", type: "library", version: "3.1.41", license: "BSD-3-Clause" }
+            ]
+        };
+
+        function initDashboard() {
+            const total = sbom.components.length;
+
+            const types = {};
+            const licenses = {};
+
+            sbom.components.forEach(c => {
+                types[c.type] = (types[c.type] || 0) + 1;
+                licenses[c.license] = (licenses[c.license] || 0) + 1;
+            });
+
+            document.getElementById("total-components").innerText = total;
+            document.getElementById("types-count").innerText = Object.keys(types).length;
+            document.getElementById("licenses-count").innerText = Object.keys(licenses).length;
+
+            document.getElementById("types-label").innerText = 
+                Object.entries(types).map(([k,v]) => `${k}: ${v}`).join(", ");
+
+            document.getElementById("licenses-label").innerText = 
+                Object.entries(licenses).map(([k,v]) => `${k}: ${v}`).join(", ");
+
+            // Build table rows
+            const tbody = document.getElementById("component-table-body");
+            sbom.components.forEach(c => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${c.name}</td>
+                    <td><span class="pill type">${c.type}</span></td>
+                    <td>${c.version}</td>
+                    <td><span class="pill license">${c.license}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = initDashboard;
+    </script>
+</head>
+
+<body>
+<header>
+    <h1>SBOM Dashboard – Impact Delphyne</h1>
+    <p>Generated dynamically from CycloneDX SBOM</p>
+</header>
+
+<div class="container">
+    <div class="cards">
+        <div class="card">
+            <h2>Total Components</h2>
+            <div class="value" id="total-components">0</div>
+            <small>From CycloneDX SBOM</small>
+        </div>
+        <div class="card">
+            <h2>Component Types</h2>
+            <div class="value" id="types-count">0</div>
+            <small id="types-label"></small>
+        </div>
+        <div class="card">
+            <h2>Licenses</h2>
+            <div class="value" id="licenses-count">0</div>
+            <small id="licenses-label"></small>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Component Inventory</h2>
+        <div style="max-height: 420px; overflow: auto; border-radius: 12px; border: 1px solid #1f2937;">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Version</th>
+                    <th>License</th>
+                </tr>
+                </thead>
+                <tbody id="component-table-body">
+                <!-- Javascript will populate -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    SBOM Dashboard generated from CycloneDX structure.<br>
+    Replace “sbom” object in script with real data for production.
+</footer>
+</body>
+</html>
