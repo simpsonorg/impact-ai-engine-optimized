@@ -1,0 +1,262 @@
+name: SBOM Generation & Publication
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM (CycloneDX + SPDX + SBOM.md)
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write     # needed to optionally commit sbom/ directory
+      actions: read
+
+    steps:
+      # -----------------------------
+      # 1. Checkout
+      # -----------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------
+      # 2. Set up Python
+      # -----------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # -----------------------------
+      # 3. Install application deps
+      #    (so SBOM is based on real env)
+      # -----------------------------
+      - name: Install application dependencies
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found, installing minimal tools only."
+          fi
+
+      # -----------------------------
+      # 4. Install SBOM tooling
+      # -----------------------------
+      - name: Install SBOM tooling
+        run: |
+          pip install cyclonedx-bom==4.0.1 cyclonedx-python-lib
+          pip install pip-licenses
+
+      # -----------------------------
+      # 5. Prepare sbom/ directory
+      # -----------------------------
+      - name: Prepare sbom directory
+        run: |
+          mkdir -p sbom
+
+      # -----------------------------
+      # 6. Generate CycloneDX SBOM (JSON)
+      #    Uses installed packages in this environment
+      # -----------------------------
+      - name: Generate CycloneDX SBOM (JSON)
+        run: |
+          # cyclonedx-py uses the current environment's installed packages
+          cyclonedx-py \
+            --force \
+            --format json \
+            --output sbom/sbom-app-cyclonedx.json
+
+      # -----------------------------
+      # 7. Generate SPDX-style license report
+      # -----------------------------
+      - name: Generate SPDX-style license report
+        run: |
+          pip-licenses \
+            --format=markdown \
+            --with-urls \
+            --with-license-file > sbom/sbom-app-licenses.spdx.md
+
+      # -----------------------------
+      # 8. Generate rich SBOM.md (human-readable)
+      #    This captures your full app context: KG, RAG, LLM, CI, microservices
+      # -----------------------------
+      - name: Generate SBOM.md (human-readable overview)
+        run: |
+          cat > sbom/SBOM.md << 'EOF'
+          # 📦 Software Bill of Materials – Impact Delphyne (AI Optimized Impact Analyzer Engine)
+
+          Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          Repository: https://github.com/simpsonorg/impact-ai-engine-optimized
+
+          ---
+
+          ## 1. System Summary
+
+          Impact Delphyne is a multi-stage automated impact analyzer that processes code changes and Pull Requests to estimate downstream impact across:
+          - Microservices
+          - API gateways and network edge (e.g., Nginx/Apigee)
+          - CRUD and data-access services
+          - Client applications and SDKs
+          - Configuration and infra artifacts
+
+          Core responsibilities:
+          - Discover service folders and artifacts
+          - Build a directed knowledge graph (NetworkX)
+          - Run RAG-based retrieval on relevant code/config snippets
+          - Orchestrate LLMs for narrative risk explanation and structured JSON output
+          - Produce a ready-to-post PR comment and impact-summary JSON
+
+          ---
+
+          ## 2. Repository Components
+
+          Core Python modules:
+          - \`run_analysis.py\` – main entrypoint and CI integration
+          - \`analyzer/vcs_scanner.py\` – repository scanning, import/URL extraction, contract discovery
+          - \`analyzer/graph_builder.py\` – knowledge graph construction and enrichment (PageRank, centrality, etc.)
+          - \`analyzer/rag_retriever.py\` – chunking and retrieval for RAG (FAISS/NumPy/pgvector)
+          - \`analyzer/impact_analyzer.py\` – LLM orchestration (structured JSON artifact + Markdown/HTML PR comment)
+          - \`tests/\` – pytest-based test suite for end-to-end and unit-level validation
+          - \`.github/workflows/impact-analysis.yml\` – CI workflow to run the impact analysis on PRs
+          - \`impact-summary.json\` – example output artifact
+
+          Supporting components (external repos / services, if configured):
+          - FastAPI-based listener microservice to receive repo update events and refresh embeddings in pgvector
+          - pgvector + Neon PostgreSQL database for long-lived embedding storage
+          - Optional FAISS index for local vector retrieval
+          - Railway/Render/Fly (or similar) for hosting the listener service
+
+          ---
+
+          ## 3. Dependency Overview (Application Level)
+
+          Core runtime dependencies (Python):
+
+          | Package       | Purpose                                       |
+          |--------------|-----------------------------------------------|
+          | networkx     | Directed knowledge graph & graph metrics      |
+          | numpy        | Vector operations & numeric utilities         |
+          | openai       | LLM and embedding APIs                        |
+          | faiss-cpu    | High-performance vector search (optional)     |
+          | pyyaml       | OpenAPI/contract parsing                      |
+          | esprima      | JS/TS parsing for client/service discovery    |
+          | GitPython    | Git-based repository operations (if used)     |
+          | fastapi      | Webhook/listener microservice                 |
+          | uvicorn      | ASGI server for the listener                  |
+          | psycopg2     | Postgres/pgvector database driver             |
+          | requests     | HTTP client (GitHub API, remote fetches)      |
+          | pytest       | Unit testing and automation validation        |
+
+          The exact installed versions are captured in:
+          - \`sbom-app-cyclonedx.json\` (CycloneDX)
+          - \`sbom-app-licenses.spdx.md\` (SPDX-style license overview)
+
+          ---
+
+          ## 4. LLM and RAG Components
+
+          Language models (conceptual SBOM items):
+          - \`gpt-4o-mini\` – primary model for PR-level impact analysis, narrative explanations, and risk scoring.
+          - \`text-embedding-3-small\` (or configured embedding model) – embeddings for code/config chunks used by RAG.
+          - (Optional) Gemini models – alternative LLMs for analysis when configured.
+
+          Retrieval-Augmented Generation pipeline:
+          - Chunker – splits files into manageable windows suitable for embedding.
+          - Embeddings – numeric representations generated via OpenAI embeddings.
+          - Vector Store – FAISS or pgvector (Neon) used for nearest-neighbor similarity search.
+          - Retriever – top-k semantic match retrieval for relevant code/config snippets.
+
+          ---
+
+          ## 5. Knowledge Graph & Impact Computation
+
+          The analyzer builds a directed knowledge graph of the system:
+
+          - Nodes:
+            - Microservices
+            - API endpoints and gateways
+            - Data services (CRUD, DB access)
+            - Client apps, SDKs, and configuration entities
+          - Edges:
+            - Service-to-service calls
+            - HTTP URL callouts and API dependencies
+            - Import-based dependencies
+            - Contract-level relationships (OpenAPI/proto)
+
+          Metrics computed (using NetworkX):
+          - PageRank
+          - Centrality measures (e.g., betweenness)
+          - Path length from changed nodes to downstream impact nodes
+
+          These metrics are fed into the LLM context to refine:
+          - Severity classification
+          - Impact ranking
+          - Risk estimation
+
+          ---
+
+          ## 6. CI/CD Integration
+
+          The system is designed to run in CI as part of Pull Request workflows.
+
+          Typical GitHub Actions integration:
+          - Collects \`CHANGED_FILES\` from PR diffs
+          - Sets \`REPOS_BASE_DIR\` to the checked-out repo
+          - Calls \`python run_analysis.py\`
+          - Persists \`impact-summary.json\` as an artifact
+          - Posts the LLM-generated Markdown/HTML comment to the PR
+
+          SBOM generation is handled by this workflow (\`.github/workflows/sbom-generation.yml\`), producing:
+          - \`sbom/sbom-app-cyclonedx.json\` – CycloneDX SBOM for the Python environment
+          - \`sbom/sbom-app-licenses.spdx.md\` – SPDX-style license and attribution overview
+          - \`sbom/SBOM.md\` – this document (high-level SBOM overview with architecture context)
+
+          ---
+
+          ## 7. Security, Compliance & Supply Chain Notes
+
+          - LLM calls send code/config snippets to external providers (OpenAI, optionally Google) and must be used in accordance with data handling policies.
+          - GitHub access tokens used in CI should be scoped minimally to content/read for scanning, and PR comment permissions for reporting.
+          - Database connections (e.g., Neon + pgvector) should enforce SSL/TLS (\`sslmode=require\`).
+          - Secrets such as API keys or DB credentials must NOT be committed to the repository and should be injected via CI secrets or environment variables.
+          - SBOM artifacts can be used by additional tooling (e.g., vulnerability scanners or license compliance checkers) as part of a larger DevSecOps pipeline.
+
+          ---
+
+          ## 8. Files Produced by This Workflow
+
+          This workflow produces and/or updates:
+
+          - \`sbom/sbom-app-cyclonedx.json\` – CycloneDX JSON SBOM (machine-readable)
+          - \`sbom/sbom-app-licenses.spdx.md\` – SPDX-style license report
+          - \`sbom/SBOM.md\` – human-readable SBOM & architecture context
+
+          These artifacts represent the current state of the dependency graph, runtime environment, and high-level architecture of the Impact Delphyne application.
+          EOF
+
+      # -----------------------------
+      # 9. Upload SBOM artifacts
+      # -----------------------------
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-package
+          path: sbom/
+
+      # -----------------------------
+      # 10. OPTIONAL: Commit sbom/ back to main/master
+      # -----------------------------
+      - name: Commit SBOM directory back to repo (optional)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+
+          git add sbom || echo "Nothing to add"
+          git commit -m "chore: update SBOM artifacts [automated]" || echo "No changes to commit"
+          git push origin HEAD || echo "No changes pushed"
