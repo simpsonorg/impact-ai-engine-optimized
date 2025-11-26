@@ -5,3 +5,4 @@ networkx
 httpx
 pyyaml
 esprima
+cyclonedx-bom
