@@ -38,6 +38,7 @@ jobs:
         run: |
           if [ -f "requirements.txt" ]; then
             pip install --upgrade pip
+            pip install cyclonedx-bom cyclonedx-python-lib
             pip install -r requirements.txt
           else
             echo "requirements.txt not found — skipping app dependency installation."
