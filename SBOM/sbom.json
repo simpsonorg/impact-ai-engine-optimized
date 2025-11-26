@@ -1,0 +1,72 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-11-26T10:34:58.232164Z",
+    "component": {
+      "type": "application",
+      "name": "Impact Delphyne - AI Optimized Impact Analyzer Engine",
+      "version": "1.0.0",
+      "purl": "pkg:github/simpsonorg/impact-ai-engine-optimized"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "networkx",
+      "license": {
+        "id": "BSD-3-Clause"
+      }
+    },
+    {
+      "type": "library",
+      "name": "numpy",
+      "license": {
+        "id": "BSD-3-Clause"
+      }
+    },
+    {
+      "type": "library",
+      "name": "openai",
+      "license": {
+        "id": "MIT"
+      }
+    },
+    {
+      "type": "library",
+      "name": "faiss-cpu",
+      "license": {
+        "id": "MIT"
+      }
+    },
+    {
+      "type": "library",
+      "name": "pyyaml",
+      "license": {
+        "id": "MIT"
+      }
+    },
+    {
+      "type": "library",
+      "name": "fastapi",
+      "license": {
+        "id": "MIT"
+      }
+    },
+    {
+      "type": "library",
+      "name": "uvicorn",
+      "license": {
+        "id": "BSD-3-Clause"
+      }
+    },
+    {
+      "type": "library",
+      "name": "GitPython",
+      "license": {
+        "id": "BSD-3-Clause"
+      }
+    }
+  ]
+}

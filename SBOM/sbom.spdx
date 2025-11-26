@@ -1,0 +1,22 @@
+SPDXVersion: SPDX-2.2
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+name: Impact Delphyne SBOM
+documentNamespace: http://spdx.org/spdxdocs/impact-delphyne-1764153298.233079
+
+PackageName: networkx
+PackageLicenseDeclared: BSD-3-Clause
+PackageName: numpy
+PackageLicenseDeclared: BSD-3-Clause
+PackageName: openai
+PackageLicenseDeclared: MIT
+PackageName: faiss-cpu
+PackageLicenseDeclared: MIT
+PackageName: pyyaml
+PackageLicenseDeclared: MIT
+PackageName: fastapi
+PackageLicenseDeclared: MIT
+PackageName: uvicorn
+PackageLicenseDeclared: BSD-3-Clause
+PackageName: GitPython
+PackageLicenseDeclared: BSD-3-Clause
