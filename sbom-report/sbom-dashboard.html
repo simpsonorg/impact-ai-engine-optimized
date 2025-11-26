@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SBOM Dashboard – Impact Delphyne</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: system-ui;
+    }
+    header {
+      padding: 24px 32px;
+      background: linear-gradient(90deg,#6366f1,#8b5cf6,#d946ef);
+      color: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .container {
+      padding: 24px 32px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .card {
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 1rem;
+      color: #c7d2fe;
+    }
+    .card .value {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .chart-container {
+      margin: 30px 0;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      background: #1e293b;
+      padding: 10px;
+      color: #a5b4fc;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #334155;
+    }
+    tr:hover td {
+      background: rgba(255,255,255,0.05);
+    }
+    .pill.type {
+      background: #1d4ed8;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+    .pill.license {
+      background: #047857;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Impact Delphyne – SBOM Dashboard</h1>
+  <p>Generated at 2025-11-26T12:17:11.196573Z</p>
+</header>
+
+<div class="container">
+
+  <div class="cards">
+    <div class="card">
+      <h2>Total Components</h2>
+      <div class="value">56</div>
+    </div>
+    <div class="card">
+      <h2>Component Types</h2>
+      <div class="value">1</div>
+    </div>
+    <div class="card">
+      <h2>Unique Licenses</h2>
+      <div class="value">1</div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <h2>Component Types Distribution</h2>
+    <canvas id="typesChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>License Distribution</h2>
+    <canvas id="licenseChart"></canvas>
+  </div>
+
+  <h2>Component Inventory</h2>
+  <div class="search-box">
+    <input id="searchBox" placeholder="Search..." onkeyup="filterTable()" />
+  </div>
+
+  <div style="max-height: 500px; overflow:auto">
+    <table id="componentsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Version</th>
+          <th>License</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      <tr>
+        <td>PyYAML</td>
+        <td><span class='pill type'>library</span></td>
+        <td>6.0.3</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>annotated-types</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.7.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>anyio</td>
+        <td><span class='pill type'>library</span></td>
+        <td>4.11.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>arrow</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.4.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>attrs</td>
+        <td><span class='pill type'>library</span></td>
+        <td>25.4.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>boolean.py</td>
+        <td><span class='pill type'>library</span></td>
+        <td>5.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>certifi</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2025.11.12</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>chardet</td>
+        <td><span class='pill type'>library</span></td>
+        <td>5.2.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>cyclonedx-bom</td>
+        <td><span class='pill type'>library</span></td>
+        <td>7.2.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>cyclonedx-python-lib</td>
+        <td><span class='pill type'>library</span></td>
+        <td>11.5.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>defusedxml</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.7.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>distro</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.9.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>esprima</td>
+        <td><span class='pill type'>library</span></td>
+        <td>4.0.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>faiss-cpu</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.13.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>fqdn</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.5.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>h11</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.16.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>httpcore</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.0.9</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>httpx</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.28.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>idna</td>
+        <td><span class='pill type'>library</span></td>
+        <td>3.11</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>isoduration</td>
+        <td><span class='pill type'>library</span></td>
+        <td>20.11.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>jiter</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.12.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>jsonpointer</td>
+        <td><span class='pill type'>library</span></td>
+        <td>3.0.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>jsonschema</td>
+        <td><span class='pill type'>library</span></td>
+        <td>4.25.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>jsonschema-specifications</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2025.9.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>lark</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.3.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>license-expression</td>
+        <td><span class='pill type'>library</span></td>
+        <td>30.4.4</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>lxml</td>
+        <td><span class='pill type'>library</span></td>
+        <td>6.0.2</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>networkx</td>
+        <td><span class='pill type'>library</span></td>
+        <td>3.6</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>numpy</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.3.5</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>openai</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.8.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>packageurl-python</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.17.6</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>packaging</td>
+        <td><span class='pill type'>library</span></td>
+        <td>25.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pip</td>
+        <td><span class='pill type'>library</span></td>
+        <td>25.3</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pip-licenses</td>
+        <td><span class='pill type'>library</span></td>
+        <td>5.5.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pip-requirements-parser</td>
+        <td><span class='pill type'>library</span></td>
+        <td>32.0.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>prettytable</td>
+        <td><span class='pill type'>library</span></td>
+        <td>3.17.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>py-serializable</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.1.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pydantic</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.12.4</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pydantic_core</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.41.5</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>pyparsing</td>
+        <td><span class='pill type'>library</span></td>
+        <td>3.2.5</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>python-dateutil</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.9.0.post0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>referencing</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.37.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>rfc3339-validator</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.1.4</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>rfc3986-validator</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.1.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>rfc3987-syntax</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.1.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>rpds-py</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.29.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>six</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.17.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>sniffio</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.3.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>sortedcontainers</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2.4.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>tqdm</td>
+        <td><span class='pill type'>library</span></td>
+        <td>4.67.1</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>typing-inspection</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.4.2</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>typing_extensions</td>
+        <td><span class='pill type'>library</span></td>
+        <td>4.15.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>tzdata</td>
+        <td><span class='pill type'>library</span></td>
+        <td>2025.2</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>uri-template</td>
+        <td><span class='pill type'>library</span></td>
+        <td>1.3.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>wcwidth</td>
+        <td><span class='pill type'>library</span></td>
+        <td>0.2.14</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      <tr>
+        <td>webcolors</td>
+        <td><span class='pill type'>library</span></td>
+        <td>25.10.0</td>
+        <td><span class='pill license'>Unknown</span></td>
+      </tr>
+    
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  new Chart(document.getElementById('typesChart'), {
+    type: 'pie',
+    data: {
+      labels: ['library'],
+      datasets: [{ data: [56] }]
+    }
+  });
+
+  new Chart(document.getElementById('licenseChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Unknown'],
+      datasets: [{ data: [56] }]
+    }
+  });
+
+  function filterTable() {
+    let filter = document.getElementById("searchBox").value.toLowerCase();
+    let rows = document.querySelectorAll("#componentsTable tbody tr");
+    rows.forEach(r => {
+      r.style.display = r.innerText.toLowerCase().includes(filter) ? "" : "none";
+    });
+  }
+</script>
+
+</body>
+</html>

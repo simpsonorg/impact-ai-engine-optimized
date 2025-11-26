@@ -1,0 +1,682 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-11-26T12:17:11.229691Z"
+  },
+  "vulnerabilities": [
+    {
+      "id": "NO-KNOWN-VULN-PyYAML",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "PyYAML==6.0.3"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-annotated-types",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "annotated-types==0.7.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-anyio",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "anyio==4.11.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-arrow",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "arrow==1.4.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-attrs",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "attrs==25.4.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-boolean.py",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "boolean.py==5.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-certifi",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "certifi==2025.11.12"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-chardet",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "chardet==5.2.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-cyclonedx-bom",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "cyclonedx-bom==7.2.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-cyclonedx-python-lib",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "cyclonedx-python-lib==11.5.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-defusedxml",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "defusedxml==0.7.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-distro",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "distro==1.9.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-esprima",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "esprima==4.0.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-faiss-cpu",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "faiss-cpu==1.13.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-fqdn",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "fqdn==1.5.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-h11",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "h11==0.16.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-httpcore",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "httpcore==1.0.9"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-httpx",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "httpx==0.28.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-idna",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "idna==3.11"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-isoduration",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "isoduration==20.11.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-jiter",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "jiter==0.12.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-jsonpointer",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "jsonpointer==3.0.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-jsonschema",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "jsonschema==4.25.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-jsonschema-specifications",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "jsonschema-specifications==2025.9.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-lark",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "lark==1.3.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-license-expression",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "license-expression==30.4.4"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-lxml",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "lxml==6.0.2"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-networkx",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "networkx==3.6"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-numpy",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "numpy==2.3.5"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-openai",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "openai==2.8.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-packageurl-python",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "packageurl-python==0.17.6"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-packaging",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "packaging==25.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pip",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pip==25.3"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pip-licenses",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pip-licenses==5.5.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pip-requirements-parser",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pip-requirements-parser==32.0.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-prettytable",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "prettytable==3.17.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-py-serializable",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "py-serializable==2.1.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pydantic",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pydantic==2.12.4"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pydantic_core",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pydantic_core==2.41.5"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-pyparsing",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "pyparsing==3.2.5"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-python-dateutil",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "python-dateutil==2.9.0.post0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-referencing",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "referencing==0.37.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-rfc3339-validator",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "rfc3339-validator==0.1.4"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-rfc3986-validator",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "rfc3986-validator==0.1.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-rfc3987-syntax",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "rfc3987-syntax==1.1.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-rpds-py",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "rpds-py==0.29.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-six",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "six==1.17.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-sniffio",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "sniffio==1.3.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-sortedcontainers",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "sortedcontainers==2.4.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-tqdm",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "tqdm==4.67.1"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-typing-inspection",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "typing-inspection==0.4.2"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-typing_extensions",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "typing_extensions==4.15.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-tzdata",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "tzdata==2025.2"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-uri-template",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "uri-template==1.3.0"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-wcwidth",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "wcwidth==0.2.14"
+        }
+      ]
+    },
+    {
+      "id": "NO-KNOWN-VULN-webcolors",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "no_known_vulnerabilities"
+      },
+      "affects": [
+        {
+          "ref": "webcolors==25.10.0"
+        }
+      ]
+    }
+  ]
+}
