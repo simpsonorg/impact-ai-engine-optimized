@@ -3,7 +3,7 @@
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2025-11-26T12:22:47.270445Z"
+    "timestamp": "2025-11-28T08:08:58.104269Z"
   },
   "vulnerabilities": [
     {
@@ -458,7 +458,7 @@
       },
       "affects": [
         {
-          "ref": "pydantic==2.12.4"
+          "ref": "pydantic==2.12.5"
         }
       ]
     },
